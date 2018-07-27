@@ -108,6 +108,13 @@ func (c *Client) runHandler(handler *Handler, text string, args []string) ([]byt
 	cmd := exec.Command("bash", "-c", str)
 	cmd.Stdout = stdout
 
+	// Feed any user defined environment variables into process
+	if len(handler.Env) > 0 {
+		for k, v := range handler.Env {
+			cmd.Env = append(cmd.Env, k+"="+v)
+		}
+	}
+
 	if err := cmd.Start(); err != nil {
 		return stdout.Bytes(), err
 	}
