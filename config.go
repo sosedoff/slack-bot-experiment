@@ -9,6 +9,7 @@ import (
 )
 
 type Config struct {
+	Path       string    `yaml:"-"`
 	SlackToken string    `yaml:"slack_token"`
 	Handlers   []Handler `yml:"handlers"`
 }
@@ -19,7 +20,7 @@ func readConfig(path string) (*Config, error) {
 		return nil, err
 	}
 
-	config := &Config{}
+	config := &Config{Path: path}
 	if err := yaml.Unmarshal(body, config); err != nil {
 		return nil, err
 	}
@@ -46,4 +47,13 @@ func (c *Config) FindHandler(input string) (*Handler, []string) {
 		}
 	}
 	return nil, nil
+}
+
+func (c *Config) Reload() error {
+	config, err := readConfig(c.Path)
+	if err != nil {
+		return err
+	}
+	c = config
+	return nil
 }
