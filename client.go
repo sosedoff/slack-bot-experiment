@@ -74,6 +74,7 @@ func (c *Client) handleMessage(event *slack.MessageEvent) {
 
 	// Remove bot mention and trim whitespace
 	text := strings.TrimSpace(strings.Replace(event.Text, c.userPrefix, "", 1))
+	text = cleanupText(text)
 
 	// Determine handler for the message
 	handler, args := c.config.FindHandler(text)
