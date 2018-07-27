@@ -8,6 +8,7 @@ func TestCleanupText(t *testing.T) {
 	examples := map[string]string{
 		"<http://foo.com|foo.com>":                                                 "foo.com",
 		"sample link <https://google.com|google.com> and <http://bar.com|bar.com>": "sample link google.com and bar.com",
+		"<mailto:foo@bar.com|foo@bar.com>":                                         "foo@bar.com",
 	}
 
 	for input, expected := range examples {

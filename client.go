@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"fmt"
+	"os"
 	"os/exec"
 	"strings"
 
@@ -108,12 +109,15 @@ func (c *Client) runHandler(handler *Handler, text string, args []string) ([]byt
 
 	cmd := exec.Command("bash", "-c", str)
 	cmd.Stdout = stdout
+	cmd.Stderr = os.Stderr
 
 	// Feed any user defined environment variables into process
 	if len(handler.Env) > 0 {
+		env := os.Environ()
 		for k, v := range handler.Env {
-			cmd.Env = append(cmd.Env, k+"="+v)
+			env = append(env, k+"="+v)
 		}
+		cmd.Env = env
 	}
 
 	if err := cmd.Start(); err != nil {
