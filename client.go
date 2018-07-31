@@ -22,6 +22,7 @@ type Client struct {
 func NewClient(config *Config) *Client {
 	api := slack.New(config.SlackToken)
 	rtm := api.NewRTM()
+	rtm.SetDebug(true)
 
 	return &Client{
 		api:    api,
