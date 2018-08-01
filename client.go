@@ -69,8 +69,9 @@ func (c *Client) handleMessage(event *slack.MessageEvent) {
 	if event.BotID != "" || event.BotID == c.botId {
 		return
 	}
-	// Skip messages without mention of the bot
-	if !strings.HasPrefix(event.Text, c.userPrefix) {
+
+	// Allow direct messages or public messages with the bot prefix
+	if !(strings.HasPrefix(event.Channel, "D") || strings.HasPrefix(event.Text, c.userPrefix)) {
 		return
 	}
 
