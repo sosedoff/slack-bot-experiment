@@ -7,6 +7,7 @@ import (
 type Handler struct {
 	Pattern string            `yaml:"pattern"`
 	Script  string            `yaml:"script"`
+	Stream  bool              `yaml:"stream"`
 	Env     map[string]string `yaml:"env"`
 
 	re *regexp.Regexp
