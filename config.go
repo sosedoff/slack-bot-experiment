@@ -48,12 +48,3 @@ func (c *Config) FindHandler(input string) (*Handler, []string) {
 	}
 	return nil, nil
 }
-
-func (c *Config) Reload() error {
-	config, err := readConfig(c.Path)
-	if err != nil {
-		return err
-	}
-	c = config
-	return nil
-}
