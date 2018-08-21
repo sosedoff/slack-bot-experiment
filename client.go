@@ -83,6 +83,7 @@ func (c *Client) handleMessage(event *slack.MessageEvent) {
 	handler, args := c.config.FindHandler(text)
 	if handler == nil {
 		fmt.Println("No handler for message:", text)
+		c.write(event.Channel, "Sorry, don't know how to handle that.")
 		return
 	}
 
