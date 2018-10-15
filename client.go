@@ -1,7 +1,6 @@
 package main
 
 import (
-	"bytes"
 	"fmt"
 	"os"
 	"os/exec"
@@ -88,17 +87,23 @@ func (c *Client) handleMessage(event *slack.MessageEvent) {
 	}
 
 	// Shell out to whatever script the user provided
-	output, err := c.runHandler(handler, text, args)
+	output := make(chan string)
+
+	go func() {
+		for line := range output {
+			c.write(event.Channel, line)
+		}
+	}()
+
+	err := c.runHandler(handler, text, args, output)
+	close(output)
 	if err != nil {
-		fmt.Errorf("Run error: %v %s\n", err, output)
 		c.write(event.Channel, "ERROR:"+err.Error())
 		return
 	}
-
-	c.write(event.Channel, string(output))
 }
 
-func (c *Client) runHandler(handler *Handler, text string, args []string) ([]byte, error) {
+func (c *Client) runHandler(handler *Handler, text string, args []string, output chan string) error {
 	str := handler.Script
 
 	// Replace argument references in the script
@@ -108,10 +113,8 @@ func (c *Client) runHandler(handler *Handler, text string, args []string) ([]byt
 		str = strings.Replace(str, key, val, -1)
 	}
 
-	stdout := bytes.NewBuffer(nil)
-
 	cmd := exec.Command("bash", "-c", str)
-	cmd.Stdout = stdout
+	cmd.Stdout = stdoutWriter{Lines: output}
 	cmd.Stderr = os.Stderr
 
 	// Feed any user defined environment variables into process
@@ -123,12 +126,7 @@ func (c *Client) runHandler(handler *Handler, text string, args []string) ([]byt
 		cmd.Env = env
 	}
 
-	if err := cmd.Start(); err != nil {
-		return stdout.Bytes(), err
-	}
-
-	err := cmd.Wait()
-	return stdout.Bytes(), err
+	return cmd.Run()
 }
 
 func (c *Client) write(channel, message string) {
